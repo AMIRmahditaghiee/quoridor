@@ -406,7 +406,7 @@ def four_player_game():
     wall_places = []
     turn = 1
     #set the middle goal
-    goal = [[3, 3], [4, 4], [3, 4], [4, 3]]
+    goal = [[[i, 0] for i in range(8)], [[i, 7] for i in range(8)], [[0, i] for i in range(8)], [[7, i] for i in range(8)]]
     #main game loop
     while not game_is_over:
         print_game([player_1_place, player_2_place,
@@ -432,23 +432,23 @@ def four_player_game():
             #pass the turn
             turn = 1
         #if walls are place legally
-        if not has_way_to_goal(player_1_place, goal, wall_places, []) or not has_way_to_goal(player_2_place, goal, wall_places, [])or not has_way_to_goal(player_3_place, goal, wall_places, [])or not has_way_to_goal(player_3_place, goal, wall_places, []):
+        if not has_way_to_goal(player_1_place, goal[0], wall_places, []) or not has_way_to_goal(player_2_place, goal[1], wall_places, [])or not has_way_to_goal(player_3_place, goal[2], wall_places, [])or not has_way_to_goal(player_4_place, goal[3], wall_places, []):
             print("walls are placed in a way which is illegal")
             game_is_over = True
         #if it's 1st player won
-        if player_1_place in goal:
+        if player_1_place in goal[0]:
             print("player 1 won")
             game_is_over = True
         #if it's 2nd player won
-        if player_2_place in goal:
+        if player_2_place in goal[1]:
             print("player 2 won")
             game_is_over = True
         #if it's 3rd player won
-        if player_3_place in goal:
+        if player_3_place in goal[2]:
             print("player 3 won")
             game_is_over = True
         #if it's 4th player
-        if player_4_place in goal:
+        if player_4_place in goal[3]:
             print("player 4 won")
             game_is_over = True
 
