@@ -184,6 +184,75 @@ def has_way_to_goal(pose, goal, walls, visited):
     return result
 
 
+def player_turn(player, walls, player_walls, other_players):
+    print("first player's turn")
+    if player_walls != 0:
+        while True:
+            print("input 'W' to place 'W'all and 'M' to 'M'OVE player")
+            descission = input()
+            while descission == 'W':
+                print(
+                    "input 'H' for 'H'orizontal and 'V' for 'V'ertical walls or input 'A' to 'A'bort and go back")
+                wall_type = input()
+                if wall_type == 'H':
+                    print("input row of the wall (0-6)")
+                    row = int(input())
+                    print(
+                        "input two covering columns of the wall seperated by blank(0-7)")
+                    l = list(map(int, input().split()))
+                    l.sort()
+                    c1, c2 = l
+                    if c1-c2 != -1:
+                        print("invalid wall input")
+                    elif wall_is_valid(('H', row, c1, c2), walls):
+                        walls.append(('H', row, c1, c2))
+                        return player_walls-1
+                    else:
+                        print("can't place wall there")
+                elif wall_type == 'V':
+                    print("input column of the wall (0-6)")
+                    column = int(input())
+                    print(
+                        "input two covering rows of the wall seperated by blank(0-7)")
+                    r1, r2 = list(map(int, input().split()))
+                    if (r1-r2 != 1 and r1-r2 != -1):
+                        print("invalid wall input")
+                    elif wall_is_valid(('V', column, r1, r2), walls):
+                        walls.append(('V', column, r1, r2))
+                        player_walls -= 1
+                        invalid_input = False
+                        break
+                    else:
+                        print("can't place wall there")
+                elif wall_type == 'A':
+                    break
+            else:
+                while descission == 'M':
+                    print(
+                        "input direction with WASD!(or 'B' to go 'B'ACK)")
+                    move_d = input()
+                    if move_d == 'B':
+                        break
+                    elif move_d not in ['W', 'A', 'S', 'D']:
+                        print("invalid input")
+                    elif move_is_valid(player, walls, move_d, other_players):
+                        move_player(player, move_d, walls,other_players)
+                        return player_walls
+                    else:
+                        print("can't move that way")
+    else:
+        while True:
+            print("input direction with WASD!(You don't have walls anymore!)")
+            move_d = input()
+            if move_d not in ['W', 'A', 'S', 'D']:
+                print("invalid input")
+            elif move_is_valid(player, walls, move_d, other_players):
+                        move_player(player, move_d, walls,other_players)
+                        return player_walls
+            else:
+                print("can't move that way")
+
+
 #function to play game as two player
 def two_player_game():
     #declaring players starting places and walls
@@ -199,152 +268,10 @@ def two_player_game():
     while not game_is_over:
         print_game([player_1_place, player_2_place], wall_places)
         if turn == 1:
-            invalid_input = True
-            print("first player's turn")
-            if player_1_walls != 0:
-                while invalid_input:
-                    print("input 'W' to place 'W'all and 'M' to 'M'OVE player")
-                    descission = input()
-                    while descission == 'W':
-                        print(
-                            "input 'H' for 'H'orizontal and 'V' for 'V'ertical walls or input 'A' to 'A'bort and go back")
-                        wall_type = input()
-                        if wall_type == 'H':
-                            print("input row of the wall (0-6)")
-                            row = int(input())
-                            print(
-                                "input two covering columns of the wall seperated by blank(0-7)")
-                            l = list(map(int, input().split()))
-                            l.sort()
-                            c1, c2 = l
-                            if c1-c2 != -1:
-                                print("invalid wall input")
-                            elif wall_is_valid(('H', row, c1, c2), wall_places):
-                                wall_places.append(('H', row, c1, c2))
-                                player_1_walls -= 1
-                                invalid_input = False
-                                break
-                            else:
-                                print("can't place wall there")
-                        elif wall_type == 'V':
-                            print("input column of the wall (0-6)")
-                            column = int(input())
-                            print(
-                                "input two covering rows of the wall seperated by blank(0-7)")
-                            r1, r2 = list(map(int, input().split()))
-                            if (r1-r2 != 1 and r1-r2 != -1):
-                                print("invalid wall input")
-                            elif wall_is_valid(('V', column, r1, r2), wall_places):
-                                wall_places.append(('V', column, r1, r2))
-                                player_1_walls -= 1
-                                invalid_input = False
-                                break
-                            else:
-                                print("can't place wall there")
-                        elif wall_type == 'A':
-                            break
-                    else:
-                        while descission == 'M':
-                            print(
-                                "input direction with WASD!(or 'B' to go 'B'ACK)")
-                            move_d = input()
-                            if move_d == 'B':
-                                break
-                            elif move_d not in ['W', 'A', 'S', 'D']:
-                                print("invalid input")
-                            elif move_is_valid(player_1_place, wall_places, move_d, [player_2_place]):
-                                move_player(player_1_place, move_d, wall_places,
-                                            [player_2_place])
-                                invalid_input = False
-                                break
-                            else:
-                                print("can't move that way")
-            else:
-                while invalid_input:
-                    print("input direction with WASD!(You don't have walls anymore!)")
-                    move_d = input()
-                    if move_d not in ['W', 'A', 'S', 'D']:
-                        print("invalid input")
-                    elif move_is_valid(player_1_place, wall_places, move_d, [player_2_place]):
-                        move_player(player_1_place, move_d,
-                                    wall_places, [player_2_place])
-                        invalid_input = False
-                    else:
-                        print("can't move that way")
+            player_1_walls = player_turn(player_1_place, wall_places, player_1_walls, [player_2_place])
             turn = 2
         elif turn == 2:
-            invalid_input = True
-            print("second player's turn")
-            if player_2_walls != 0:
-                while invalid_input:
-                    print("input 'W' to place 'W'all and 'M' to 'M'OVE player")
-                    descission = input()
-                    while descission == 'W':
-                        print(
-                            "input 'H' for 'H'orizontal and 'V' for 'V'ertical walls or input 'A' to 'A'bort and go back")
-                        wall_type = input()
-                        if wall_type == 'H':
-                            print("input row of the wall (0-6)")
-                            row = int(input())
-                            print(
-                                "input two covering columns of the wall seperated by blank(0-7)")
-                            l = list(map(int, input().split()))
-                            l.sort()
-                            c1, c2 = l
-                            if c1-c2 != -1:
-                                print("invalid wall input")
-                            elif wall_is_valid(('H', row, c1, c2), wall_places):
-                                wall_places.append(('H', row, c1, c2))
-                                player_2_walls -= 1
-                                invalid_input = False
-                                break
-                            else:
-                                print("can't place wall there")
-                        elif wall_type == 'V':
-                            print("input column of the wall (0-6)")
-                            column = int(input())
-                            print(
-                                "input two covering rows of the wall seperated by blank(0-7)")
-                            r1, r2 = list(map(int, input().split()))
-                            if (r1-r2 != 1 and r1-r2 != -1):
-                                print("invalid wall input")
-                            elif wall_is_valid(('V', column, r1, r2), wall_places):
-                                wall_places.append(('V', column, r1, r2))
-                                player_2_walls -= 1
-                                invalid_input = False
-                                break
-                            else:
-                                print("can't place wall there")
-                        elif wall_type == 'A':
-                            break
-                    else:
-                        while descission == 'M':
-                            print(
-                                "input direction with WASD!(or 'B' to go 'B'ACK)")
-                            move_d = input()
-                            if move_d == 'B':
-                                break
-                            elif move_d not in ['W', 'A', 'S', 'D']:
-                                print("invalid input")
-                            elif move_is_valid(player_2_place, wall_places, move_d, [player_1_place]):
-                                move_player(player_2_place, move_d, wall_places,
-                                            [player_1_place])
-                                invalid_input = False
-                                break
-                            else:
-                                print("can't move that way")
-            else:
-                while invalid_input:
-                    print("input direction with WASD!(You don't have walls anymore!)")
-                    move_d = input()
-                    if move_d not in ['W', 'A', 'S', 'D']:
-                        print("invalid input")
-                    elif move_is_valid(player_2_place, wall_places, move_d, [player_1_place]):
-                        move_player(player_2_place, move_d,
-                                    wall_places, [player_1_place])
-                        invalid_input = False
-                    else:
-                        print("can't move that way")
+            player_2_walls = player_turn(player_2_place, wall_places, player_2_walls, [player_1_place])
             turn = 1
         if not has_way_to_goal(player_1_place, [[i, 7] for i in range(8)], wall_places, []) or not has_way_to_goal(player_2_place, [[i, 0] for i in range(8)], wall_places, []):
             print("walls are placed in a way which is illegal")
@@ -377,300 +304,16 @@ def four_player_game():
         print_game([player_1_place, player_2_place,
                     player_3_place, player_4_place], wall_places)
         if turn == 1:
-            invalid_input = True
-            print("first player's turn")
-            if player_1_walls != 0:
-                while invalid_input:
-                    print("input 'W' to place 'W'all and 'M' to 'M'OVE player")
-                    descission = input()
-                    while descission == 'W':
-                        print(
-                            "input 'H' for 'H'orizontal and 'V' for 'V'ertical walls or input 'A' to 'A'bort and go back")
-                        wall_type = input()
-                        if wall_type == 'H':
-                            print("input row of the wall (0-6)")
-                            row = int(input())
-                            print(
-                                "input two covering columns of the wall seperated by blank(0-7)")
-                            l = list(map(int, input().split()))
-                            l.sort()
-                            c1, c2 = l
-                            if c1-c2 != -1:
-                                print("invalid wall input")
-                            elif wall_is_valid(('H', row, c1, c2), wall_places):
-                                wall_places.append(('H', row, c1, c2))
-                                player_1_walls -= 1
-                                invalid_input = False
-                                break
-                            else:
-                                print("can't place wall there")
-                        elif wall_type == 'V':
-                            print("input column of the wall (0-6)")
-                            column = int(input())
-                            print(
-                                "input two covering rows of the wall seperated by blank(0-7)")
-                            r1, r2 = list(map(int, input().split()))
-                            if (r1-r2 != 1 and r1-r2 != -1):
-                                print("invalid wall input")
-                            elif wall_is_valid(('V', column, r1, r2), wall_places):
-                                wall_places.append(('V', column, r1, r2))
-                                player_1_walls -= 1
-                                invalid_input = False
-                                break
-                            else:
-                                print("can't place wall there")
-                        elif wall_type == 'A':
-                            break
-                    else:
-                        while descission == 'M':
-                            print(
-                                "input direction with WASD!(or 'B' to go 'B'ACK)")
-                            move_d = input()
-                            if move_d == 'B':
-                                break
-                            elif move_d not in ['W', 'A', 'S', 'D']:
-                                print("invalid input")
-                            elif move_is_valid(player_1_place, wall_places, move_d, [player_2_place, player_3_place, player_4_place]):
-                                move_player(player_1_place, move_d, wall_places,
-                                            [player_2_place, player_3_place, player_4_place])
-                                invalid_input = False
-                                break
-                            else:
-                                print("can't move that way")
-            else:
-                while invalid_input:
-                    print("input direction with WASD!(You don't have walls anymore!)")
-                    move_d = input()
-                    if move_d not in ['W', 'A', 'S', 'D']:
-                        print("invalid input")
-                    elif move_is_valid(player_1_place, wall_places, move_d, [player_2_place, player_3_place, player_4_place]):
-                        move_player(player_1_place, move_d,
-                                    wall_places, [player_2_place, player_3_place, player_4_place])
-                        invalid_input = False
-                    else:
-                        print("can't move that way")
+            player_1_walls = player_turn(player_1_place, wall_places, player_1_walls, [player_2_place, player_3_place, player_4_place])
             turn = 2
         elif turn == 2:
-            invalid_input = True
-            print("second player's turn")
-            if player_2_walls != 0:
-                while invalid_input:
-                    print("input 'W' to place 'W'all and 'M' to 'M'OVE player")
-                    descission = input()
-                    while descission == 'W':
-                        print(
-                            "input 'H' for 'H'orizontal and 'V' for 'V'ertical walls or input 'A' to 'A'bort and go back")
-                        wall_type = input()
-                        if wall_type == 'H':
-                            print("input row of the wall (0-6)")
-                            row = int(input())
-                            print(
-                                "input two covering columns of the wall seperated by blank(0-7)")
-                            l = list(map(int, input().split()))
-                            l.sort()
-                            c1, c2 = l
-                            if c1-c2 != -1:
-                                print("invalid wall input")
-                            elif wall_is_valid(('H', row, c1, c2), wall_places):
-                                wall_places.append(('H', row, c1, c2))
-                                player_2_walls -= 1
-                                invalid_input = False
-                                break
-                            else:
-                                print("can't place wall there")
-                        elif wall_type == 'V':
-                            print("input column of the wall (0-6)")
-                            column = int(input())
-                            print(
-                                "input two covering rows of the wall seperated by blank(0-7)")
-                            r1, r2 = list(map(int, input().split()))
-                            if (r1-r2 != 1 and r1-r2 != -1):
-                                print("invalid wall input")
-                            elif wall_is_valid(('V', column, r1, r2), wall_places):
-                                wall_places.append(('V', column, r1, r2))
-                                player_2_walls -= 1
-                                invalid_input = False
-                                break
-                            else:
-                                print("can't place wall there")
-                        elif wall_type == 'A':
-                            break
-                    else:
-                        while descission == 'M':
-                            print(
-                                "input direction with WASD!(or 'B' to go 'B'ACK)")
-                            move_d = input()
-                            if move_d == 'B':
-                                break
-                            elif move_d not in ['W', 'A', 'S', 'D']:
-                                print("invalid input")
-                            elif move_is_valid(player_2_place, wall_places, move_d, [player_1_place, player_3_place, player_4_place]):
-                                move_player(player_2_place, move_d, wall_places,
-                                            [player_1_place, player_3_place, player_4_place])
-                                invalid_input = False
-                                break
-                            else:
-                                print("can't move that way")
-            else:
-                while invalid_input:
-                    print("input direction with WASD!(You don't have walls anymore!)")
-                    move_d = input()
-                    if move_d not in ['W', 'A', 'S', 'D']:
-                        print("invalid input")
-                    elif move_is_valid(player_2_place, wall_places, move_d, [player_1_place, player_3_place, player_4_place]):
-                        move_player(player_2_place, move_d,
-                                    wall_places, [player_1_place, player_3_place, player_4_place])
-                        invalid_input = False
-                    else:
-                        print("can't move that way")
+            player_2_walls = player_turn(player_2_place, wall_places, player_2_walls, [player_1_place, player_3_place, player_4_place])
             turn = 3
         elif turn == 3:
-            invalid_input = True
-            print("third player's turn")
-            if player_3_walls != 0:
-                while invalid_input:
-                    print("input 'W' to place 'W'all and 'M' to 'M'OVE player")
-                    descission = input()
-                    while descission == 'W':
-                        print(
-                            "input 'H' for 'H'orizontal and 'V' for 'V'ertical walls or input 'A' to 'A'bort and go back")
-                        wall_type = input()
-                        if wall_type == 'H':
-                            print("input row of the wall (0-6)")
-                            row = int(input())
-                            print(
-                                "input two covering columns of the wall seperated by blank(0-7)")
-                            l = list(map(int, input().split()))
-                            l.sort()
-                            c1, c2 = l
-                            if c1-c2 != -1:
-                                print("invalid wall input")
-                            elif wall_is_valid(('H', row, c1, c2), wall_places):
-                                wall_places.append(('H', row, c1, c2))
-                                player_3_walls -= 1
-                                invalid_input = False
-                                break
-                            else:
-                                print("can't place wall there")
-                        elif wall_type == 'V':
-                            print("input column of the wall (0-6)")
-                            column = int(input())
-                            print(
-                                "input two covering rows of the wall seperated by blank(0-7)")
-                            r1, r2 = list(map(int, input().split()))
-                            if (r1-r2 != 1 and r1-r2 != -1):
-                                print("invalid wall input")
-                            elif wall_is_valid(('V', column, r1, r2), wall_places):
-                                wall_places.append(('V', column, r1, r2))
-                                player_3_walls -= 1
-                                invalid_input = False
-                                break
-                            else:
-                                print("can't place wall there")
-                        elif wall_type == 'A':
-                            break
-                    else:
-                        while descission == 'M':
-                            print(
-                                "input direction with WASD!(or 'B' to go 'B'ACK)")
-                            move_d = input()
-                            if move_d == 'B':
-                                break
-                            elif move_d not in ['W', 'A', 'S', 'D']:
-                                print("invalid input")
-                            elif move_is_valid(player_3_place, wall_places, move_d, [player_1_place, player_2_place, player_4_place]):
-                                move_player(player_3_place, move_d, wall_places,
-                                            [player_1_place, player_2_place, player_4_place])
-                                invalid_input = False
-                                break
-                            else:
-                                print("can't move that way")
-            else:
-                while invalid_input:
-                    print("input direction with WASD!(You don't have walls anymore!)")
-                    move_d = input()
-                    if move_d not in ['W', 'A', 'S', 'D']:
-                        print("invalid input")
-                    elif move_is_valid(player_3_place, wall_places, move_d, [player_1_place, player_2_place, player_4_place]):
-                        move_player(player_3_place, move_d,
-                                    wall_places, [player_1_place, player_2_place, player_4_place])
-                        invalid_input = False
-                    else:
-                        print("can't move that way")
+            player_3_walls = player_turn(player_3_place, wall_places, player_3_walls, [player_1_place, player_2_place, player_4_place])
             turn = 4
         elif turn == 4:
-            invalid_input = True
-            print("fourth player's turn")
-            if player_4_walls != 0:
-                while invalid_input:
-                    print("input 'W' to place 'W'all and 'M' to 'M'OVE player")
-                    descission = input()
-                    while descission == 'W':
-                        print(
-                            "input 'H' for 'H'orizontal and 'V' for 'V'ertical walls or input 'A' to 'A'bort and go back")
-                        wall_type = input()
-                        if wall_type == 'H':
-                            print("input row of the wall (0-6)")
-                            row = int(input())
-                            print(
-                                "input two covering columns of the wall seperated by blank(0-7)")
-                            l = list(map(int, input().split()))
-                            l.sort()
-                            c1, c2 = l
-                            if c1-c2 != -1:
-                                print("invalid wall input")
-                            elif wall_is_valid(('H', row, c1, c2), wall_places):
-                                wall_places.append(('H', row, c1, c2))
-                                player_4_walls -= 1
-                                invalid_input = False
-                                break
-                            else:
-                                print("can't place wall there")
-                        elif wall_type == 'V':
-                            print("input column of the wall (0-6)")
-                            column = int(input())
-                            print(
-                                "input two covering rows of the wall seperated by blank(0-7)")
-                            r1, r2 = list(map(int, input().split()))
-                            if (r1-r2 != 1 and r1-r2 != -1):
-                                print("invalid wall input")
-                            elif wall_is_valid(('V', column, r1, r2), wall_places):
-                                wall_places.append(('V', column, r1, r2))
-                                player_4_walls -= 1
-                                invalid_input = False
-                                break
-                            else:
-                                print("can't place wall there")
-                        elif wall_type == 'A':
-                            break
-                    else:
-                        while descission == 'M':
-                            print(
-                                "input direction with WASD!(or 'B' to go 'B'ACK)")
-                            move_d = input()
-                            if move_d == 'B':
-                                break
-                            elif move_d not in ['W', 'A', 'S', 'D']:
-                                print("invalid input")
-                            elif move_is_valid(player_4_place, wall_places, move_d, [player_1_place, player_2_place, player_3_place]):
-                                move_player(player_4_place, move_d, wall_places,
-                                            [player_1_place, player_2_place, player_3_place])
-                                invalid_input = False
-                                break
-                            else:
-                                print("can't move that way")
-            else:
-                while invalid_input:
-                    print("input direction with WASD!(You don't have walls anymore!)")
-                    move_d = input()
-                    if move_d not in ['W', 'A', 'S', 'D']:
-                        print("invalid input")
-                    elif move_is_valid(player_4_place, wall_places, move_d, [player_1_place, player_2_place, player_3_place]):
-                        move_player(player_4_place, move_d,
-                                    wall_places, [player_1_place, player_2_place, player_3_place])
-                        invalid_input = False
-                    else:
-                        print("can't move that way")
+            player_4_walls = player_turn(player_4_place, wall_places, player_4_walls, [player_1_place, player_2_place, player_3_place])
             turn = 1
 
         if not has_way_to_goal(player_1_place, goal, wall_places, []) or not has_way_to_goal(player_2_place, goal, wall_places, [])or not has_way_to_goal(player_3_place, goal, wall_places, [])or not has_way_to_goal(player_3_place, goal, wall_places, []):
